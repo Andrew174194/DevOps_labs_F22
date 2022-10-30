@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: msc-time-py
+  labels:
+    app: time-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: time-app
+  template:
+    metadata:
+      labels:
+        app: time-app
+    spec:
+      containers:
+      - name: time-app
+        image: andrew174194/msc_time_py:latest
+        ports:
+        - containerPort: 5000
