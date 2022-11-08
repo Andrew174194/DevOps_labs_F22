@@ -74,3 +74,47 @@ There can multiple **Ingress controllers** which helps with managment on differe
 **DaemonSet** controls pods on every node, so when new node is added to cluster - new pods will be created or some pods will be transfered from one node to new one.
 
 **PersistentVolumes** is similar to Docker volume - it is a common storage that is available for all pods where each of them can store files.
+
+# Helm installation
+
+I created a new chart [chart-msc-time](./chart-msc-time) with `helm create chart-msc-time` command.  
+Next I set necessary parameters inside [`values.yaml`](chart-msc-time/values.yaml) as in [deployment.yml](deployment.yml) and [service.yml](service.yml) and changed `containerPort` for container in [templates/deployment.yaml](chart-msc-time/templates/deployment.yaml).  
+
+Install helm packeges with `helm install control chart-msc-time` (or `helm upgrade control chart-msc-time` if it's not your first try).  
+
+As a proof there is a Dashdoard's Workloads page screen  
+![](Helm.png)
+
+As you can notice, the second label mentions that deployment is managed by Helm - it is success!
+
+Service for access application outside the Docker net also works:
+```sh
+minikube service msc-time-py
+|-----------|-------------|-------------|---------------------------|
+| NAMESPACE |    NAME     | TARGET PORT |            URL            |
+|-----------|-------------|-------------|---------------------------|
+| default   | msc-time-py | http/80     | http://192.168.49.2:32391 |
+|-----------|-------------|-------------|---------------------------|
+🏃  Starting tunnel for service msc-time-py.
+|-----------|-------------|-------------|------------------------|
+| NAMESPACE |    NAME     | TARGET PORT |          URL           |
+|-----------|-------------|-------------|------------------------|
+| default   | msc-time-py |             | http://127.0.0.1:17523 |
+|-----------|-------------|-------------|------------------------|
+🎉  Opening service default/msc-time-py in default browser...
+```
+
+The overall picture is the following:
+```sh
+$ kubectl get pods,svc
+NAME                               READY   STATUS    RESTARTS   AGE
+pod/msc-time-py-765b494497-527bf   1/1     Running   0          5m14s
+pod/msc-time-py-765b494497-jnsq9   1/1     Running   0          5m14s
+pod/msc-time-py-765b494497-mmm77   1/1     Running   0          5m14s
+
+NAME                  TYPE           CLUSTER-IP     EXTERNAL-IP   PORT(S)        AGE
+service/kubernetes    ClusterIP      10.96.0.1      <none>        443/TCP        8d
+service/msc-time-py   LoadBalancer   10.97.139.70   <pending>     80:32391/TCP   5m14s
+```
+
+
