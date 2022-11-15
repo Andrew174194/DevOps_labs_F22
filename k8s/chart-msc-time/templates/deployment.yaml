@@ -33,6 +33,23 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+
+          env:
+            - name: TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: top-token
+                  key: token
+          resources:
+            requests:
+              memory: "64M" 
+              cpu: "100m" 
+              #10% of overall CPU time
+            limits:
+              memory: "256M"
+              cpu: "200m" 
+              #20% of overall CPU time
+
           ports:
             - name: http
               containerPort: 5000
@@ -45,8 +62,6 @@ spec:
             httpGet:
               path: /
               port: http
-          resources:
-            {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
