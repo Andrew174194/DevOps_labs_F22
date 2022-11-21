@@ -6,9 +6,10 @@ replicaCount: 3
 
 image:
   repository: andrew174194/msc_time_py
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
+  date: "{{ .Release.Time.Seconds }}"
 
 imagePullSecrets: []
 nameOverride: ""

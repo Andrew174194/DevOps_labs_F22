@@ -34,6 +34,13 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
 
+          volumeMounts:
+          - name: config-volume
+            mountPath: /app/config.json
+            subPath: config.json
+          - name: visit-logs
+            mountPath: /app/visits/
+
           env:
             - name: TOKEN
               valueFrom:
@@ -74,3 +81,9 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+
+      volumes:
+      - name: config-volume
+        configMap:
+          name: config-file
+      - name: visit-logs

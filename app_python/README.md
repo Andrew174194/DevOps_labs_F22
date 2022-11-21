@@ -52,6 +52,10 @@ Workflow steps:
 4) Unit tests
 5) Login to Docker Hub & push new image (pay attention to set `DOCKER_HUB_USERNAME` and `DOCKER_HUB_ACCESS_TOKEN` secrets)
 
+## /visits page
+Every time one visits the `/` index page, the new record in `/app/visits/visits.txt` saves the returned time and IP address of client.  
+This file should be common for all processes, e.g. containers in cluster.
+
 ## Author
 Andrey Khoroshavin
 

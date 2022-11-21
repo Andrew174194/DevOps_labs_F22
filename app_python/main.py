@@ -1,4 +1,5 @@
 from flask import Flask, Blueprint, request, Response
+from multiprocessing import Process
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from sys import version_info
@@ -16,9 +17,32 @@ bp = Blueprint('app', __name__)
 @bp.route('/')
 def main():
     time_msc = datetime.now(ZoneInfo("Europe/Moscow")).time()
+    time_text = time_msc.isoformat(timespec='seconds')
+    
+    write_log = Process(target=saveLog, args=(f"{time_text} - {request.remote_addr}\n",), daemon=True)
+    write_log.start()
+
     return ("Moscow time: " +
-        time_msc.isoformat(timespec='seconds') +
+        time_text +
         "<br><br>(the time is actual for the last webpage load)")
+
+def saveLog(log_str):
+    with open("/app/visits/visits.txt", "a+") as fo:
+        fo.write(log_str)
+
+@bp.route('/visits')
+def visits():
+    web_content = "History of visits at timestamps and requester's IP:<br>"
+
+    try:
+        with open("/app/visits/visits.txt", "r") as fo:   
+            file_text = fo.read().replace('\n', '<br>')
+            web_content += f"{file_text}"
+    except FileNotFoundError:
+        pass
+
+    return web_content
+
 
 @bp.route('/metrics')
 def stats():
