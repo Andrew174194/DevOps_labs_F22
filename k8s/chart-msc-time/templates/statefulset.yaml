@@ -1,10 +1,13 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: {{ include "chart-msc-time.fullname" . }}
   labels:
     {{- include "chart-msc-time.labels" . | nindent 4 }}
 spec:
+  {{- if .Values.statefulSet.parallel }}
+  podManagementPolicy: "Parallel"
+  {{- end }}
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
@@ -38,8 +41,10 @@ spec:
           - name: config-volume
             mountPath: /app/config.json
             subPath: config.json
+          {{- if .Values.commonVisits.enabled }}
           - name: visit-logs
             mountPath: /app/visits/
+          {{- end }}
 
           env:
             - name: TOKEN
@@ -61,14 +66,20 @@ spec:
             - name: http
               containerPort: 5000
               protocol: TCP
+
+          {{- if .Values.healthcheck.enabled }}  
           livenessProbe:
             httpGet:
               path: /
               port: http
+              periodSeconds: {{ .Values.healthcheck.period }}
           readinessProbe:
             httpGet:
               path: /
               port: http
+              periodSeconds: {{ .Values.healthcheck.period }}
+          {{- end }}
+
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -86,4 +97,6 @@ spec:
       - name: config-volume
         configMap:
           name: config-file
+      {{- if .Values.commonVisits.enabled }}
       - name: visit-logs
+      {{- end }}

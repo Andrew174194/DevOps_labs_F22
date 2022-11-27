@@ -76,6 +76,16 @@ autoscaling:
   targetCPUUtilizationPercentage: 80
   # targetMemoryUtilizationPercentage: 80
 
+statefulSet:
+  parallel: true
+
+commonVisits:
+  enabled: false
+
+healthcheck:
+  enabled: false
+  period: 60
+
 nodeSelector: {}
 
 tolerations: []
