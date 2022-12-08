@@ -5,6 +5,7 @@ metadata:
   labels:
     {{- include "chart-msc-time.labels" . | nindent 4 }}
 spec:
+  serviceName: "py-states"
   {{- if .Values.statefulSet.parallel }}
   podManagementPolicy: "Parallel"
   {{- end }}
@@ -38,6 +39,8 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
 
           volumeMounts:
+          - name: booting
+            mountPath: "/app/test"
           - name: config-volume
             mountPath: /app/config.json
             subPath: config.json
@@ -93,7 +96,21 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
 
+      initContainers:
+      - name: init
+        image: busybox:1.28
+        command:
+        - wget
+        - "-O"
+        - "/booting/index.html"
+        - http://info.cern.ch
+        volumeMounts:
+        - name: booting
+          mountPath: "/booting"
+
       volumes:
+      - name: booting
+        emptyDir: {}
       - name: config-volume
         configMap:
           name: config-file
